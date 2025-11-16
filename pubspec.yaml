@@ -1,19 +1,45 @@
-name: katakata
+name: katakata_app
 description: "A new Flutter project."
 publish_to: 'none'
-version: 0.1.0
+
+version: 1.0.0+1
 
 environment:
-  sdk: ^3.9.2
+  sdk: '>=3.5.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
 
+  flutter_localizations:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.6
+  flutter_riverpod: ^2.5.1
+  go_router: ^13.2.0
+  hive: ^2.2.3
+  path_provider: ^2.1.3
+  google_fonts: ^6.2.1
+  flutter_svg: ^2.0.10+1
+  lottie: ^3.1.0
+  fl_chart: ^0.68.0
+  firebase_core: ^3.1.0
+  firebase_auth: ^5.1.0
+  cloud_firestore: ^5.0.0
+  flip_card: ^0.7.0
+  speech_to_text: ^6.3.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+
+  flutter_lints: ^3.0.0
+  hive_generator: ^2.0.1
+  build_runner: ^2.4.11
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/lottie/
