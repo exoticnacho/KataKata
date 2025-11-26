@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:katakata_app/core/constants/colors.dart';
 import 'package:katakata_app/core/services/user_service.dart';
+import 'package:katakata_app/features/minigames/flashcard_screen.dart';
 import 'package:katakata_app/widgets/mascot_widget.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -74,13 +75,16 @@ class HomeScreen extends ConsumerWidget {
                   const SizedBox(height: 12),
                   _buildActionTile(
                     context,
-                    title: 'Flashcards (Segera)',
+                    title: 'Flashcards',
                     subtitle: 'Hafalan cepat kata-kata baru',
                     icon: Icons.style_rounded,
                     color: KataKataColors.pinkCeria,
                     onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Fitur segera hadir!')),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const FlashcardScreen(),
+                        ),
                       );
                     },
                   ),
@@ -137,20 +141,14 @@ class HomeScreen extends ConsumerWidget {
               ],
             ),
           ),
-          Container(
-            padding: const EdgeInsets.all(3),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                  color: KataKataColors.pinkCeria.withOpacity(0.3), width: 2),
-            ),
-            child: GestureDetector(
-              onTap: () => context.push('/profile'),
-              child: const CircleAvatar(
-                radius: 24,
-                backgroundImage:
-                    AssetImage('assets/images/icon_avatar_placeholder.png'),
-                backgroundColor: Colors.transparent,
+          GestureDetector(
+            onTap: () => context.push('/profile'),
+            child: Container(
+              height: 60,
+              width: 60,
+              child: Image.asset(
+                'assets/images/mascot_avatar.png',
+                fit: BoxFit.contain,
               ),
             ),
           ),
