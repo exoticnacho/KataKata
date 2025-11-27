@@ -3,7 +3,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:katakata_app/core/services/auth_service.dart';
-import 'package:katakata_app/core/services/user_service.dart';
 import 'package:katakata_app/features/splash/splash_screen.dart';
 import 'package:katakata_app/features/onboarding/onboarding_screen.dart';
 import 'package:katakata_app/features/auth/sign_in_screen.dart';
@@ -12,12 +11,13 @@ import 'package:katakata_app/features/home/home_screen.dart';
 import 'package:katakata_app/features/lesson/lesson_screen.dart';
 import 'package:katakata_app/features/profile/profile_screen.dart';
 import 'package:katakata_app/features/statistics/statistics_screen.dart';
-import 'package:katakata_app/widgets/level_up_modal.dart';
 import 'package:katakata_app/features/lesson/stage_selection_screen.dart';
 import 'package:katakata_app/features/lesson/language_selection_screen.dart';
 import 'package:katakata_app/features/statistics/word_list_screen.dart';
 import 'package:katakata_app/features/minigames/flashcard_screen.dart';
 import 'package:katakata_app/features/minigames/pronunciation_screen.dart';
+import 'package:katakata_app/features/leaderboard/leaderboard_screen.dart';
+import 'package:katakata_app/features/dailychallenge/dailychallenge_screen.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -31,6 +31,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final bool loggedIn = authState;
       final String location = state.uri.toString();
       final isPublicRoute = (location == '/' || location == '/onboarding' || location == '/signin');
+      
       final isAuthRoute = location.startsWith('/home') ||
           location.startsWith('/profile') ||
           location.startsWith('/statistik') ||
@@ -39,7 +40,9 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           location.startsWith('/stages') ||
           location.startsWith('/wordlist') ||
           location.startsWith('/flashcard') ||
-          location.startsWith('/pronounce');
+          location.startsWith('/pronounce') ||
+          location.startsWith('/leaderboard') ||
+          location.startsWith('/dailychallenge');
 
       if (!loggedIn && isAuthRoute) {
         return '/signin';
@@ -54,6 +57,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/', builder: (context, state) => const SplashScreen()),
       GoRoute(path: '/onboarding', builder: (context, state) => const OnboardingScreen()),
       GoRoute(path: '/signin', builder: (context, state) => const SignInScreen()),
+      
       ShellRoute(
         builder: (context, state, child) {
           return MainLayoutScreen(child: child);
@@ -64,8 +68,18 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/profile', builder: (context, state) => const ProfileScreen()),
           GoRoute(path: '/languages', builder: (context, state) => const LanguageSelectionScreen()),
           GoRoute(path: '/wordlist', builder: (context, state) => const WordListScreen()),
+          GoRoute(
+            path: '/leaderboard',
+            builder: (context, state) => const LeaderboardScreen(),
+          ),
         ],
       ),
+      
+      GoRoute(
+        path: '/dailychallenge',
+        builder: (context, state) => const DailyChallengeScreen(),
+      ),
+      
       GoRoute(
         path: '/stages',
         builder: (context, state) => const StageSelectionScreen(),

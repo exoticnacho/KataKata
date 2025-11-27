@@ -8,6 +8,7 @@ import 'package:katakata_app/core/services/user_service.dart';
 import 'package:katakata_app/widgets/custom_button.dart';
 import 'package:katakata_app/widgets/level_up_modal.dart';
 import 'package:katakata_app/widgets/mascot_widget.dart';
+import 'package:katakata_app/features/dailychallenge/dailychallenge_screen.dart';
 
 class LessonScreen extends ConsumerWidget {
   final int stageNumber;
@@ -189,6 +190,8 @@ class LessonScreen extends ConsumerWidget {
                     if (lessonState.answerSubmitted) {
                       if (lessonState.isCorrect && userProfile != null) {
                         ref.read(userProfileProvider.notifier).addXp(10);
+                        
+                        ref.read(dailyChallengeProvider.notifier).incrementTaskProgress('2');
                       }
                       lessonNotifier.nextQuestion();
                     } else {
@@ -284,6 +287,8 @@ class LessonScreen extends ConsumerWidget {
     if (userProfileBefore != null) {
       userProfileNotifier.addXp(100);
     }
+    
+    ref.read(dailyChallengeProvider.notifier).incrementTaskProgress('1');
 
     lessonNotifier.resetLesson();
 

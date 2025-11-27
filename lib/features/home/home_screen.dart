@@ -33,7 +33,7 @@ class HomeScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildStatsRow(),
+                  _buildStatsRow(context),
                   const SizedBox(height: 24),
                   Text(
                     'Lanjutkan Perjalanan',
@@ -55,6 +55,27 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
+                  
+                  _buildActionTile(
+                    context,
+                    title: 'Papan Peringkat',
+                    subtitle: 'Lihat posisimu vs teman lain',
+                    icon: Icons.emoji_events_rounded,
+                    color: Colors.amber,
+                    onTap: () => context.push('/leaderboard'),
+                  ),
+                  const SizedBox(height: 12),
+
+                  _buildActionTile(
+                    context,
+                    title: 'Tantangan Harian',
+                    subtitle: 'Misi harian & bonus XP',
+                    icon: Icons.local_fire_department_rounded,
+                    color: Colors.deepOrange,
+                    onTap: () => context.push('/dailychallenge'),
+                  ),
+                  const SizedBox(height: 12),
+
                   _buildActionTile(
                     context,
                     title: 'Latihan Pengucapan',
@@ -157,16 +178,19 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildStatsRow() {
+  Widget _buildStatsRow(BuildContext context) {
     return Row(
       children: [
         Expanded(
-          child: _buildStatCard(
-            icon: 'assets/images/icon_streak.png',
-            label: 'Streak',
-            value: '3 Hari',
-            bgColor: const Color(0xFFFFF5E6),
-            accentColor: Colors.orange,
+          child: GestureDetector(
+            onTap: () => context.push('/dailychallenge'),
+            child: _buildStatCard(
+              icon: 'assets/images/icon_streak.png',
+              label: 'Streak',
+              value: '3 Hari',
+              bgColor: const Color(0xFFFFF5E6),
+              accentColor: Colors.orange,
+            ),
           ),
         ),
         const SizedBox(width: 16),
