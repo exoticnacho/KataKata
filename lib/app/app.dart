@@ -10,6 +10,7 @@ import 'package:katakata_app/features/main/main_layout_screen.dart';
 import 'package:katakata_app/features/home/home_screen.dart';
 import 'package:katakata_app/features/lesson/lesson_screen.dart';
 import 'package:katakata_app/features/profile/profile_screen.dart';
+import 'package:katakata_app/features/settings/settings_screen.dart';
 import 'package:katakata_app/features/statistics/statistics_screen.dart';
 import 'package:katakata_app/features/lesson/stage_selection_screen.dart';
 import 'package:katakata_app/features/lesson/language_selection_screen.dart';
@@ -34,6 +35,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       
       final isAuthRoute = location.startsWith('/home') ||
           location.startsWith('/profile') ||
+          location.startsWith('/settings') ||
           location.startsWith('/statistik') ||
           location.startsWith('/lesson') ||
           location.startsWith('/languages') ||
@@ -98,6 +100,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/pronounce',
         builder: (context, state) => const PronunciationScreen(),
+      ),
+      GoRoute(
+        path: '/settings',
+        builder: (context, state) => const SettingsScreen(),
       ),
     ],
   );
