@@ -481,8 +481,8 @@ class ProfileScreen extends ConsumerWidget {
         Expanded(
           child: _StatCard(
             title: 'Ranking',
-            value: '4',
-            unit: 'Global',
+            value: '#4',
+            unit: 'All Time',
             icon: Icons.emoji_events_rounded,
             color: const Color(0xFFFFBF00),
             bgColor: const Color(0xFFFFF9E1),
@@ -577,7 +577,7 @@ class ProfileScreen extends ConsumerWidget {
           _AchievementCard3D(
             imagePath: 'assets/images/icon_streak.png',
             title: 'On Fire',
-            subtitle: '7 Hari Streak',
+            subtitle: '3 Hari Streak',
             color: Color(0xFFFFF3E0),
           ),
           SizedBox(width: 16),
