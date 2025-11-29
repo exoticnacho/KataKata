@@ -2,8 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-// --- MODEL USER ---
-// Kita ganti nama class jadi AppUser agar tidak bentrok dengan User dari Firebase
 class AppUser {
   final String id;
   final String name;
@@ -18,17 +16,11 @@ class AppUser {
   });
 }
 
-// --- PROVIDERS ---
-
 final isAuthenticatedProvider = StateProvider<bool>((ref) => false);
-
 final userProvider = StateProvider<AppUser?>((ref) => null);
-
 final authProvider = StateNotifierProvider<AuthNotifier, bool>((ref) {
   return AuthNotifier(ref);
 });
-
-// --- NOTIFIER (LOGIC) ---
 
 class AuthNotifier extends StateNotifier<bool> {
   final Ref ref;
@@ -48,14 +40,14 @@ class AuthNotifier extends StateNotifier<bool> {
     });
   }
 
-  // 1. FUNGSI GOOGLE SIGN IN (Ini yang dicari error 'undefined method')
+  // 1. FUNGSI GOOGLE SIGN IN 
   Future<void> signInWithGoogle() async {
-    state = true; // Loading mulai
+    state = true;
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       
       if (googleUser == null) {
-        state = false; // Batal login
+        state = false; 
         return; 
       }
 
@@ -75,7 +67,6 @@ class AuthNotifier extends StateNotifier<bool> {
     }
   }
 
-  // 2. FUNGSI LOGIN BIASA
   Future<void> login(String email, String password) async {
     state = true;
     try {
@@ -88,7 +79,7 @@ class AuthNotifier extends StateNotifier<bool> {
     }
   }
 
-  // 3. FUNGSI REGISTER (Ini juga yang dicari error 'undefined method')
+  // 3. FUNGSI REGISTER 
   Future<void> register(String name, String email, String password) async {
     state = true;
     try {
