@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "381690222292",
+    "project_id": "katakata-daniel",
+    "storage_bucket": "katakata-daniel.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:381690222292:android:d6cd200003a18cd37d8d41",
+        "android_client_info": {
+          "package_name": "com.example.katakata"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC-AQRei42zKMZNurafoPNNB_62nJ5Uxd0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
