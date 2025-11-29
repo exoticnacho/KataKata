@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:katakata_app/core/services/auth_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; 
 
 class UserProfile {
   final String name;
@@ -17,6 +18,28 @@ class UserProfile {
     required this.xp,
     this.isLevelingUp = false,
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'streak': streak,
+      'totalWordsTaught': totalWordsTaught,
+      'currentLevel': currentLevel,
+      'xp': xp,
+      'isLevelingUp': isLevelingUp,
+    };
+  }
+
+  factory UserProfile.fromMap(Map<String, dynamic> map) {
+    return UserProfile(
+      name: map['name'] ?? 'Pengguna',
+      streak: map['streak'] ?? 0,
+      totalWordsTaught: map['totalWordsTaught'] ?? 0,
+      currentLevel: map['currentLevel'] ?? 1,
+      xp: map['xp'] ?? 0,
+      isLevelingUp: map['isLevelingUp'] ?? false,
+    );
+  }
 
   UserProfile copyWith({
     String? name,
@@ -44,28 +67,57 @@ final userProfileProvider =
 
 class UserProfileNotifier extends StateNotifier<UserProfile?> {
   final Ref ref;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   UserProfileNotifier(this.ref) : super(null) {
-    initializeProfile();
-
     ref.listen<bool>(isAuthenticatedProvider, (bool? previous, bool? next) {
       if (next == true) {
-        initializeProfile();
+        _loadUserProfile();
       } else if (next == false) {
         state = null;
       }
     });
+    
+    if (ref.read(isAuthenticatedProvider)) {
+      _loadUserProfile();
+    }
   }
 
-  void initializeProfile() {
-    state = UserProfile(
-      name: 'Pengguna KataKata',
-      streak: 0,
-      totalWordsTaught: 5,
-      currentLevel: 1,
-      xp: 0,
-      isLevelingUp: false,
-    );
+  Future<void> _loadUserProfile() async {
+    final user = ref.read(userProvider);
+    if (user == null) return;
+
+    try {
+      final doc = await _db.collection('users').doc(user.id).get();
+      
+      if (doc.exists && doc.data() != null) {
+        state = UserProfile.fromMap(doc.data()!);
+      } else {
+        final newProfile = UserProfile(
+          name: user.name,
+          streak: 0,
+          totalWordsTaught: 0,
+          currentLevel: 1,
+          xp: 0,
+          isLevelingUp: false,
+        );
+        await _db.collection('users').doc(user.id).set(newProfile.toMap());
+        state = newProfile;
+      }
+    } catch (e) {
+      print("Error loading user profile: $e");
+    }
+  }
+
+  Future<void> _saveToFirestore(UserProfile profile) async {
+    final user = ref.read(userProvider);
+    if (user != null) {
+      try {
+        await _db.collection('users').doc(user.id).update(profile.toMap());
+      } catch (e) {
+        print("Error saving to firestore: $e");
+      }
+    }
   }
 
   void addXp(int xpToAdd) {
@@ -76,37 +128,43 @@ class UserProfileNotifier extends StateNotifier<UserProfile?> {
 
       if (newXp >= requiredXpForNextLevel) {
         levelUp();
+      } else {
+        state = state!.copyWith(xp: newXp);
+        _saveToFirestore(state!);
       }
-
-      state = state!.copyWith(xp: newXp);
     }
   }
 
   void addWordsTaught(int wordsToAdd) {
     if (state != null) {
-      int newTotalWords = state!.totalWordsTaught + wordsToAdd;
-      state = state!.copyWith(
-        totalWordsTaught: newTotalWords,
+      final newState = state!.copyWith(
+        totalWordsTaught: state!.totalWordsTaught + wordsToAdd,
       );
+      state = newState;
+      _saveToFirestore(newState);
     }
   }
 
   void levelUp() {
     if (state != null) {
       int nextLevel = state!.currentLevel + 1;
-      int remainingXp = state!.xp;
+      int currentXp = state!.xp; 
 
-      state = state!.copyWith(
+      final newState = state!.copyWith(
         currentLevel: nextLevel,
-        xp: remainingXp,
+        xp: currentXp, 
         isLevelingUp: true,
       );
+      state = newState;
+      _saveToFirestore(newState);
     }
   }
 
   void resetLevelUpStatus() {
     if (state != null && state!.isLevelingUp) {
-      state = state!.copyWith(isLevelingUp: false);
+      final newState = state!.copyWith(isLevelingUp: false);
+      state = newState;
+      _saveToFirestore(newState);
     }
   }
 }

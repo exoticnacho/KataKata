@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart'; 
 class AppUser {
   final String id;
   final String name;
@@ -25,12 +25,11 @@ final authProvider = StateNotifierProvider<AuthNotifier, bool>((ref) {
 class AuthNotifier extends StateNotifier<bool> {
   final Ref ref;
   
-  // Instance Firebase & Google
   final firebase_auth.FirebaseAuth _auth = firebase_auth.FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   AuthNotifier(this.ref) : super(false) {
-    // Listener: Cek status login secara realtime
     _auth.authStateChanges().listen((firebase_auth.User? user) {
       if (user != null) {
         _updateUserState(user);
@@ -40,9 +39,8 @@ class AuthNotifier extends StateNotifier<bool> {
     });
   }
 
-  // 1. FUNGSI GOOGLE SIGN IN 
   Future<void> signInWithGoogle() async {
-    state = true;
+    state = true; 
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       
@@ -58,7 +56,24 @@ class AuthNotifier extends StateNotifier<bool> {
         idToken: googleAuth.idToken,
       );
 
-      await _auth.signInWithCredential(credential);
+      final userCredential = await _auth.signInWithCredential(credential);
+      
+      if (userCredential.user != null) {
+         final doc = await _db.collection('users').doc(userCredential.user!.uid).get();
+         if (!doc.exists) {
+           await _db.collection('users').doc(userCredential.user!.uid).set({
+             'name': userCredential.user!.displayName ?? 'Pengguna',
+             'email': userCredential.user!.email ?? '',
+             'streak': 0,
+             'totalWordsTaught': 0,
+             'currentLevel': 1,
+             'xp': 0,
+             'isLevelingUp': false,
+             'createdAt': FieldValue.serverTimestamp(),
+           });
+         }
+      }
+
     } catch (e) {
       print("Error Google Sign In: $e");
       rethrow;
@@ -79,7 +94,6 @@ class AuthNotifier extends StateNotifier<bool> {
     }
   }
 
-  // 3. FUNGSI REGISTER 
   Future<void> register(String name, String email, String password) async {
     state = true;
     try {
@@ -91,6 +105,19 @@ class AuthNotifier extends StateNotifier<bool> {
       await userCredential.user?.updateDisplayName(name);
       await userCredential.user?.reload();
       
+      if (userCredential.user != null) {
+        await _db.collection('users').doc(userCredential.user!.uid).set({
+          'name': name,
+          'email': email,
+          'streak': 0,
+          'totalWordsTaught': 0,
+          'currentLevel': 1,
+          'xp': 0,
+          'isLevelingUp': false,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
+
       final updatedUser = _auth.currentUser;
       if (updatedUser != null) {
          _updateUserState(updatedUser);
@@ -103,7 +130,6 @@ class AuthNotifier extends StateNotifier<bool> {
     }
   }
 
-  // 4. FUNGSI LOGOUT
   Future<void> logout() async {
     await _googleSignIn.signOut();
     await _auth.signOut();
