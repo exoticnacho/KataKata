@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:ui';
 import 'package:katakata_app/core/constants/colors.dart';
 import 'package:katakata_app/core/services/auth_service.dart';
 import 'package:katakata_app/core/services/user_service.dart';
@@ -13,11 +14,29 @@ class SettingsScreen extends ConsumerStatefulWidget {
   ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+class _SettingsScreenState extends ConsumerState<SettingsScreen> with TickerProviderStateMixin {
   bool _notifikasiEnabled = true;
   bool _soundEnabled = true;
   TimeOfDay _reminderTime = const TimeOfDay(hour: 20, minute: 00);
   String _selectedLevel = 'Menengah';
+  
+  late AnimationController _entranceController;
+
+  @override
+  void initState() {
+    super.initState();
+    _entranceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+    _entranceController.forward();
+  }
+
+  @override
+  void dispose() {
+    _entranceController.dispose();
+    super.dispose();
+  }
 
   Future<void> _selectTime(BuildContext context) async {
     final TimeOfDay? picked = await showTimePicker(
@@ -104,130 +123,171 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      body: SingleChildScrollView(
-        physics: const ClampingScrollPhysics(),
-        child: Column(
-          children: [
-            Stack(
-              clipBehavior: Clip.none,
+      body: Stack(
+        children: [
+          const _BackgroundParticles(),
+          SingleChildScrollView(
+            physics: const ClampingScrollPhysics(),
+            child: Column(
               children: [
-                _buildCurvedHeader(context),
-                Positioned(
-                  top: 110,
-                  left: 24,
-                  right: 24,
-                  child: _buildProfileEditCard(currentUser),
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    _buildCurvedHeader(context),
+                    Positioned(
+                      top: 110,
+                      left: 24,
+                      right: 24,
+                      child: _SlideInElement(
+                        controller: _entranceController,
+                        delay: 0.2,
+                        child: _buildProfileEditCard(currentUser),
+                      ),
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: 90), 
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _SlideInElement(
+                        controller: _entranceController,
+                        delay: 0.3,
+                        child: _SectionLabel(title: 'Preferensi Belajar'),
+                      ),
+                      _SlideInElement(
+                        controller: _entranceController,
+                        delay: 0.4,
+                        child: _buildSettingsGroup(
+                          children: [
+                            _SwitchTile(
+                              icon: Icons.notifications_active_outlined,
+                              title: 'Notifikasi Belajar',
+                              color: Colors.orange,
+                              value: _notifikasiEnabled,
+                              onChanged: (val) => setState(() => _notifikasiEnabled = val),
+                            ),
+                            if (_notifikasiEnabled)
+                              _SettingsTile(
+                                icon: Icons.access_time_rounded,
+                                title: 'Jam Pengingat',
+                                color: Colors.blue,
+                                trailingText: _reminderTime.format(context),
+                                onTap: () => _selectTime(context),
+                              ),
+                            _SettingsTile(
+                              icon: Icons.bar_chart_rounded,
+                              title: 'Tingkat Kesulitan',
+                              color: Colors.purple,
+                              trailingText: _selectedLevel,
+                              onTap: () => _showLevelSelector(context),
+                            ),
+                            _SwitchTile(
+                              icon: Icons.volume_up_outlined,
+                              title: 'Efek Suara',
+                              color: KataKataColors.pinkCeria,
+                              value: _soundEnabled,
+                              onChanged: (val) => setState(() => _soundEnabled = val),
+                              isLast: true,
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      _SlideInElement(
+                        controller: _entranceController,
+                        delay: 0.5,
+                        child: _SectionLabel(title: 'Akun & Keamanan'),
+                      ),
+                      _SlideInElement(
+                        controller: _entranceController,
+                        delay: 0.6,
+                        child: _buildSettingsGroup(
+                          children: [
+                            _SettingsTile(
+                              icon: Icons.lock_outline_rounded,
+                              title: 'Ganti Kata Sandi',
+                              color: Colors.green,
+                              onTap: () {},
+                            ),
+                            _SettingsTile(
+                              icon: Icons.delete_outline_rounded,
+                              title: 'Hapus Akun',
+                              color: Colors.red,
+                              textColor: Colors.red,
+                              onTap: () {},
+                              isLast: true,
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      _SlideInElement(
+                        controller: _entranceController,
+                        delay: 0.7,
+                        child: _SectionLabel(title: 'Lainnya'),
+                      ),
+                      _SlideInElement(
+                        controller: _entranceController,
+                        delay: 0.8,
+                        child: _buildSettingsGroup(
+                          children: [
+                            _SettingsTile(
+                              icon: Icons.help_outline_rounded,
+                              title: 'Bantuan & Dukungan',
+                              color: Colors.teal,
+                              onTap: () {},
+                            ),
+                            _SettingsTile(
+                              icon: Icons.info_outline_rounded,
+                              title: 'Tentang Aplikasi',
+                              color: Colors.indigo,
+                              onTap: () {},
+                              isLast: true,
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 40),
+
+                      _SlideInElement(
+                        controller: _entranceController,
+                        delay: 0.9,
+                        child: _LogoutButton(ref: ref),
+                      ),
+
+                      const SizedBox(height: 30),
+                      _SlideInElement(
+                        controller: _entranceController,
+                        delay: 1.0,
+                        child: Center(
+                          child: Text(
+                            'KataKata App v2.1.0\nMade with 💖 in Indonesia',
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              color: Colors.grey[400],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 40),
+                    ],
+                  ),
                 ),
               ],
             ),
-            
-            const SizedBox(height: 90), 
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _SectionLabel(title: 'Preferensi Belajar'),
-                  _buildSettingsGroup(
-                    children: [
-                      _SwitchTile(
-                        icon: Icons.notifications_active_outlined,
-                        title: 'Notifikasi Belajar',
-                        color: Colors.orange,
-                        value: _notifikasiEnabled,
-                        onChanged: (val) => setState(() => _notifikasiEnabled = val),
-                      ),
-                      if (_notifikasiEnabled)
-                        _SettingsTile(
-                          icon: Icons.access_time_rounded,
-                          title: 'Jam Pengingat',
-                          color: Colors.blue,
-                          trailingText: _reminderTime.format(context),
-                          onTap: () => _selectTime(context),
-                        ),
-                      _SettingsTile(
-                        icon: Icons.bar_chart_rounded,
-                        title: 'Tingkat Kesulitan',
-                        color: Colors.purple,
-                        trailingText: _selectedLevel,
-                        onTap: () => _showLevelSelector(context),
-                      ),
-                      _SwitchTile(
-                        icon: Icons.volume_up_outlined,
-                        title: 'Efek Suara',
-                        color: KataKataColors.pinkCeria,
-                        value: _soundEnabled,
-                        onChanged: (val) => setState(() => _soundEnabled = val),
-                        isLast: true,
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  _SectionLabel(title: 'Akun & Keamanan'),
-                  _buildSettingsGroup(
-                    children: [
-                      _SettingsTile(
-                        icon: Icons.lock_outline_rounded,
-                        title: 'Ganti Kata Sandi',
-                        color: Colors.green,
-                        onTap: () {},
-                      ),
-                      _SettingsTile(
-                        icon: Icons.delete_outline_rounded,
-                        title: 'Hapus Akun',
-                        color: Colors.red,
-                        textColor: Colors.red,
-                        onTap: () {},
-                        isLast: true,
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  _SectionLabel(title: 'Lainnya'),
-                  _buildSettingsGroup(
-                    children: [
-                      _SettingsTile(
-                        icon: Icons.help_outline_rounded,
-                        title: 'Bantuan & Dukungan',
-                        color: Colors.teal,
-                        onTap: () {},
-                      ),
-                      _SettingsTile(
-                        icon: Icons.info_outline_rounded,
-                        title: 'Tentang Aplikasi',
-                        color: Colors.indigo,
-                        onTap: () {},
-                        isLast: true,
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 40),
-
-                  _LogoutButton(ref: ref),
-
-                  const SizedBox(height: 30),
-                  Center(
-                    child: Text(
-                      'KataKata App v2.1.0\nMade with 💖 in Indonesia',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        color: Colors.grey[400],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -491,12 +551,19 @@ class _SettingsTile extends StatelessWidget {
                 if (trailingText != null)
                   Padding(
                     padding: const EdgeInsets.only(right: 8),
-                    child: Text(
-                      trailingText!,
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: KataKataColors.pinkCeria,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: KataKataColors.offWhite,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        trailingText!,
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: KataKataColors.pinkCeria,
+                        ),
                       ),
                     ),
                   ),
@@ -754,6 +821,92 @@ class _BouncyButtonState extends State<_BouncyButton> with SingleTickerProviderS
         scale: _scale,
         child: widget.child,
       ),
-    ); 
+    );
+  }
+}
+
+class _SlideInElement extends StatelessWidget {
+  final Widget child;
+  final double delay;
+  final AnimationController controller;
+
+  const _SlideInElement({
+    required this.child,
+    required this.delay,
+    required this.controller,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SlideTransition(
+      position: Tween<Offset>(
+        begin: const Offset(0, 0.3),
+        end: Offset.zero,
+      ).animate(
+        CurvedAnimation(
+          parent: controller,
+          curve: Interval(delay, 1.0, curve: Curves.easeOutQuart),
+        ),
+      ),
+      child: FadeTransition(
+        opacity: Tween<double>(begin: 0, end: 1).animate(
+          CurvedAnimation(
+            parent: controller,
+            curve: Interval(delay, 1.0, curve: Curves.easeOut),
+          ),
+        ),
+        child: child,
+      ),
+    );
+  }
+}
+
+class _BackgroundParticles extends StatelessWidget {
+  const _BackgroundParticles();
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Positioned(
+          top: 150,
+          left: 20,
+          child: _Particle(color: Colors.blue.withOpacity(0.05), size: 100),
+        ),
+        Positioned(
+          top: 400,
+          right: -20,
+          child: _Particle(color: KataKataColors.pinkCeria.withOpacity(0.05), size: 150),
+        ),
+        Positioned(
+          bottom: 100,
+          left: 50,
+          child: _Particle(color: Colors.yellow.withOpacity(0.05), size: 80),
+        ),
+      ],
+    );
+  }
+}
+
+class _Particle extends StatelessWidget {
+  final Color color;
+  final double size;
+
+  const _Particle({required this.color, required this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+      ),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        child: Container(color: Colors.transparent),
+      ),
+    );
   }
 }
