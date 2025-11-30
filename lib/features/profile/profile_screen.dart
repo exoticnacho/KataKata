@@ -302,7 +302,7 @@ class ProfileScreen extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    userProfile != null ? 'Level ${userProfile.currentLevel}' : 'Level 1',
+                    userProfile = 'Level 2',
                     style: GoogleFonts.poppins(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
