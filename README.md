@@ -34,7 +34,7 @@ Pastikan Anda telah menginstal **Flutter SDK** dan memiliki konfigurasi lingkung
 ### 2. Kloning Repositori
 
 ```bash
-git clone [URL_REPO_ANDA]
+git clone https://github.com/exoticnacho/KataKata
 cd KataKata
 ```
 
