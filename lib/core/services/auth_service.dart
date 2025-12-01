@@ -29,6 +29,34 @@ class AuthNotifier extends StateNotifier<bool> {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
+  Future<void> signInWithGitHub() async {
+    state = true;
+    try {
+      final firebase_auth.GithubAuthProvider githubProvider = firebase_auth.GithubAuthProvider();
+      final userCredential = await _auth.signInWithProvider(githubProvider);
+      if (userCredential.user != null) {
+         final doc = await _db.collection('users').doc(userCredential.user!.uid).get();
+         if (!doc.exists) {
+           await _db.collection('users').doc(userCredential.user!.uid).set({
+             'name': userCredential.user!.displayName ?? 'Pengguna GitHub',
+             'email': userCredential.user!.email ?? '', 
+             'streak': 0,
+             'totalWordsTaught': 0,
+             'currentLevel': 1,
+             'xp': 0,
+             'isLevelingUp': false,
+             'createdAt': FieldValue.serverTimestamp(),
+           });
+         }
+      }
+    } catch (e) {
+      print("Error GitHub Sign In: $e");
+      rethrow;
+    } finally {
+      state = false;
+    }
+  }
+
   AuthNotifier(this.ref) : super(false) {
     _auth.authStateChanges().listen((firebase_auth.User? user) {
       if (user != null) {
